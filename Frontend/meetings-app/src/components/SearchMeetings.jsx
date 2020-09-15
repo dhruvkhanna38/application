@@ -110,8 +110,8 @@ class SearchMeetings extends Component {
                 <div className="col-12">
                     <form onSubmit={this.getMeetingsFunction}>
                         <div className="form-group row">
-                            <label forHtml="viewDate" className="col-sm-3 col-form-label">View Meetings For</label>
-                            <select class="form-control col-sm-9" id="viewDate" name="viewDate" ref={this.viewDateInputRef} onChange={this.updateCredentials}>
+                            <label forhtml="viewDate" className="col-sm-3 col-form-label">View Meetings For</label>
+                            <select className="form-control col-sm-9" id="viewDate" name="viewDate" ref={this.viewDateInputRef} onChange={this.updateCredentials}>
                                 <option>All</option>
                                 <option>Today</option>
                                 <option>Past</option>

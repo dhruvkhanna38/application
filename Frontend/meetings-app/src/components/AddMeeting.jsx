@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Meetings from './Meetings'
 import {addMeeting} from "../services/meetings.js"
 import {getEmail} from "../services/auth.js"
+const moment = require('moment');
 
 
 class AddMeeting extends Component {
@@ -9,7 +10,7 @@ class AddMeeting extends Component {
     constructor(props){
         super(props);
         this.state = {
-         dateOfMeeting:new Date().toLocaleDateString(),
+         dateOfMeeting:moment().format('DD/MM/YYYY'),
          startHour : 0 ,
          startMin : 0 , 
          endHour: 0, 
@@ -37,7 +38,7 @@ class AddMeeting extends Component {
 
     updateCredentials =()=>{
         this.setState({
-            dateOfMeeting:new Date(this.dateInputRef.current.value).toLocaleDateString(), 
+            dateOfMeeting:moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY'), 
             startHour:Number(this.shInputRef.current.value),
             startMin:Number(this.smInputRef.current.value),
             endHour:Number(this.ehInputRef.current.value),
@@ -49,7 +50,7 @@ class AddMeeting extends Component {
     addMeetingFunction = async (event)=>{
         event.preventDefault();
         const emailsArr = await this.createEmailArray();
-        console.log(emailsArr)
+        
         await this.setState({
             emails:emailsArr
         })

@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
-import {getMeetingByDate} from "../services/meetings.js"
+import {getMeetingByDate} from "../services/meetings.js";
+const moment = require("moment");
+
 
 class Calender extends Component {
     constructor(props){
         super(props);
         this.state = {
             Meetings : null,
-            dateOfMeeting : new Date().toLocaleDateString()
+            dateOfMeeting : moment().format('DD/MM/YYYY')
         }
         this.dateInputRef = React.createRef()
     }
 
     updateCredentials = ()=>{
         this.setState({
-            dateOfMeeting:new Date(this.dateInputRef.current.value).toLocaleDateString()
+            dateOfMeeting:moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY')
         })
     }
     
