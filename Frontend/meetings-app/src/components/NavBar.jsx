@@ -1,16 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {isLoggedIn, logout} from "../services/auth.js"
-import { Redirect } from 'react-router-dom'
+import { Redirect , withRouter} from 'react-router-dom'
 
 class NavBar extends React.Component {
     constructor(props){
         super(props);
     }
 
-    logoutFunction = ()=>{
-        logout()
+    logoutFunction = async()=>{
+        await logout();
+        this.props.history.push("/");
     }
+    
+
     // b4-navbar-minimal-ul
     render (){
         return (
@@ -41,4 +44,4 @@ class NavBar extends React.Component {
     }
 }
 
-export default NavBar;
+export default withRouter(NavBar);

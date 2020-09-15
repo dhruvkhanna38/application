@@ -13,6 +13,7 @@ class App extends React.Component {
         super(props);
     }
 
+    
 
     render(){
         return (
@@ -22,17 +23,15 @@ class App extends React.Component {
                 <Route path="/" exact>
                     <Home />
                 </Route>
-                <Route path="/login" exact>
-                    <Login />
+                <Route path="/login" exact component={Login}>
                 </Route>
-                <Route path="/meetings">
-                    <Meetings />
+                <Route path="/meetings" >
+                        <Meetings />
                 </Route>
-                <Route path="/signup">
-                    <Signup />
+                <Route path="/signup" exact component={Signup}>
+                    
                 </Route>
-                <Route path="/calender">
-                    <Calender />
+                <Route path="/calender" exact component={Calender}>
                 </Route>
             </div>
         </BrowserRouter>

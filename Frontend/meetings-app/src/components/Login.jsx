@@ -14,9 +14,11 @@ class Login extends Component {
         this.passwordInputRef = React.createRef();
     }
 
+    
     login = (event)=>{
         event.preventDefault();
-        login(this.state);
+        login(this.state).then(()=>{this.props.history.push('/');
+                                    window.location.reload();}).catch(error=>alert(error))
     }
 
     updateCredentials = ()=>{
@@ -53,7 +55,7 @@ class Login extends Component {
                             </div>
                         </div>
                         <div className="form-group row">
-                            <button className="btn btn-primary">Login</button>
+                            <button className="btn btn-primary w-100">Login</button>
                         </div>
                     </form>
                 </div>

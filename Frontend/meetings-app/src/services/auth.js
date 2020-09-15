@@ -11,8 +11,6 @@ const axiosOptions = {
 export let isLoggedIn = localStorage.getItem('token');
 
 export async function login(credentials){
-    console.log(credentials)
-    
    const response = await axios.post(loginURL, credentials, {
         ...axiosOptions,
         headers: {
@@ -20,7 +18,6 @@ export async function login(credentials){
         }
     });
     if (response.data) {
-        console.log(response.data);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('email', response.data.user.email);
         isLoggedIn = true;
@@ -40,7 +37,6 @@ export async function signup(credentials){
          }
      });
      if (response.data) {
-         console.log(response.data);
          localStorage.setItem('token', response.data.token);
          localStorage.setItem('email', response.data.user.email);
          isLoggedIn = true;
@@ -59,4 +55,8 @@ export function logout(){
 
 export function getAuthToken(){
     return localStorage.getItem('token');
+}
+
+export function getEmail(){
+    return localStorage.getItem('email');
 }

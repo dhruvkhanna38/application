@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import Meetings from './Meetings'
 import {addMeeting} from "../services/meetings.js"
+import {getEmail} from "../services/auth.js"
+
 
 class AddMeeting extends Component {
+
     constructor(props){
         super(props);
         this.state = {
@@ -12,7 +15,7 @@ class AddMeeting extends Component {
          endHour: 0, 
          endMin :0, 
          description : "",
-         
+         emails:[]
         }
         this.dateInputRef = React.createRef();
         this.shInputRef = React.createRef();
@@ -20,23 +23,38 @@ class AddMeeting extends Component {
         this.ehInputRef =React.createRef();
         this.emInputRef = React.createRef();
         this.descInputRef = React.createRef();
+        this.emailInputRef = React.createRef();
+        this.state.emails.push(getEmail());
         
     }
+
+    createEmailArray = ()=>{
+        let emailsArray = this.emailInputRef.current.value;
+        let emailsArr = emailsArray.split(',');
+        emailsArr = emailsArr.filter(email=>email!=="")
+        return emailsArr;
+    }
+
     updateCredentials =()=>{
         this.setState({
-            dateOfMeeting:this.dateInputRef.current.value, 
+            dateOfMeeting:new Date(this.dateInputRef.current.value).toLocaleDateString(), 
             startHour:Number(this.shInputRef.current.value),
             startMin:Number(this.smInputRef.current.value),
             endHour:Number(this.ehInputRef.current.value),
             endMin:Number(this.emInputRef.current.value),
             description:this.descInputRef.current.value,
-            
         })
     }
 
-    addMeetingFunction = (event)=>{
+    addMeetingFunction = async (event)=>{
         event.preventDefault();
-        addMeeting(this.state);
+        const emailsArr = await this.createEmailArray();
+        console.log(emailsArr)
+        await this.setState({
+            emails:emailsArr
+        })
+        console.log(this.state);
+        addMeeting(this.state).then(()=>{alert("Meeting Submitted")}).catch(error=>alert(error));
     }
 
     render() {
@@ -72,18 +90,20 @@ class AddMeeting extends Component {
                                 <input type="number" className="form-control" name="endMin" id="endMin" placeholder="Enter Ending Minutes" ref={this.emInputRef} onChange={this.updateCredentials}/>
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="description">Description</label>
-                            <textarea className="form-control" id="description" name="description" rows="3" placeholder="What is the Agenda of the meeting?" ref={this.descInputRef} onChange={this.updateCredentials}></textarea>
-                        </div>
-                        <div>
+                        <div className="form-group row">
                             <label htmlFor="emails" className="col-sm-3 col-form-label">Emails of Attendees</label>
                             <div className="col-sm-9">
-                                <input type="text" className="form-control" name="emails" id="emails" placeholder="john@example.com, jane@example.com" />
+                                <input type="text" className="form-control" name="emails" id="emails" placeholder="john@example.com,jane@example.com" ref={this.emailInputRef} onChange={this.updateCredentials} />
                             </div>
                         </div>
                         <div className="form-group row">
-                            <button className="btn btn-primary">Submit</button>
+                            <label htmlFor="description" className="col-sm-3 col-form-label">Description</label>
+                            <div className="col-sm-9">
+                                <textarea className="form-control" id="description" name="description" rows="3" placeholder="What is the Agenda of the meeting?" ref={this.descInputRef} onChange={this.updateCredentials}></textarea>
+                            </div>
+                        </div>
+                        <div className="form-group row">
+                            <button className="btn btn-primary btn-lg w-100">Submit</button>
                         </div>
                     </form>
                 </div>

@@ -19,9 +19,8 @@ class Meetings extends Component {
                         <hr className="my-2"/>
                         
                         <div>
-                            <Link to="/meetings">Filter/Search Meetings</Link>
-                            <span>  </span> 
-                            <Link to="/meetings/add">Add Meeting</Link>
+                            <Link to="/meetings" className="btn btn-primary mr-2">Filter/Search Meetings</Link> 
+                            <Link to="/meetings/add" className="btn btn-primary ml-2">Add Meeting</Link>
                         </div>
                         
                     </div>

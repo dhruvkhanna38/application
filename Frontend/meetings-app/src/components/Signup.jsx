@@ -16,7 +16,8 @@ class Signup extends Component {
 
     signup = (event)=>{
         event.preventDefault();
-        signup(this.state);
+        signup(this.state).then(()=>{this.props.history.push('/')
+                                     window.location.reload()}).catch(error=>alert(error));
     }
 
     updateCredentials = ()=>{
@@ -60,7 +61,7 @@ class Signup extends Component {
                             </div>
                         </div>
                         <div className="form-group row">
-                            <button className="btn btn-primary">Sign Up</button>
+                            <button className="btn btn-primary w-100">Sign Up</button>
                         </div>
                     </form>
                 </div>
