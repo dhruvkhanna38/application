@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {getMeetings} from "../services/meetings.js"
-import { Route, Link, Switch } from 'react-router-dom';
+import { Route, Link, Switch, BrowserRouter } from 'react-router-dom';
 import AddMeeting from "./AddMeeting"
 import SearchMeetings from "./SearchMeetings"
 import {getEmails} from "../services/meetings.js"
@@ -11,6 +11,7 @@ class Meetings extends Component {
     
     render() {
         return (
+            <BrowserRouter>
             <div>
                 <div className="jumbotron jumbotron-fluid">
                     <div className="container">
@@ -27,15 +28,14 @@ class Meetings extends Component {
                 </div>
                 <div>
                             <Switch>
-                                <Route path='/meetings/add'>
-                                    <AddMeeting />
+                                <Route path='/meetings/add' component={AddMeeting}>
                                 </Route>
-                                <Route path="/meetings" >
-                                    <SearchMeetings />
+                                <Route path="/meetings"  component={SearchMeetings}>
                                 </Route>
                             </Switch>
                          </div>
                 </div>
+                </BrowserRouter>
         );
     }
 }

@@ -15,10 +15,14 @@ class Login extends Component {
     }
 
     
-    login = (event)=>{
+    login = async (event)=>{
         event.preventDefault();
-        login(this.state).then(()=>{this.props.history.push('/');
-                                    window.location.reload();}).catch(error=>alert(error))
+        try{
+            await login(this.state)
+            this.props.history.push('/profile');
+        }catch(error){
+            alert("Invalid Credentials");
+        }
     }
 
     updateCredentials = ()=>{

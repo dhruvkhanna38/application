@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import Meetings from './Meetings'
 import {addMeeting} from "../services/meetings.js"
 import {getEmail} from "../services/auth.js"
+import { Route, Link, Switch } from 'react-router-dom';
 const moment = require('moment');
+
 
 
 class AddMeeting extends Component {
@@ -35,7 +37,7 @@ class AddMeeting extends Component {
         emailsArr = emailsArr.filter(email=>email!=="")
         return emailsArr;
     }
-
+    
     updateCredentials =()=>{
         this.setState({
             dateOfMeeting:moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY'), 
@@ -49,13 +51,17 @@ class AddMeeting extends Component {
 
     addMeetingFunction = async (event)=>{
         event.preventDefault();
-        const emailsArr = await this.createEmailArray();
-        
-        await this.setState({
-            emails:emailsArr
-        })
-        console.log(this.state);
-        addMeeting(this.state).then(()=>{alert("Meeting Submitted")}).catch(error=>alert(error));
+        try{
+            const emailsArr = await this.createEmailArray();
+            await this.setState({
+                emails:emailsArr
+            })
+            await addMeeting(this.state);
+            alert("Meeting Submitted");
+            this.props.history.push("/meetings")
+        }catch(error){
+            alert("Enter Valid Meeting Data");
+        }
     }
 
     render() {

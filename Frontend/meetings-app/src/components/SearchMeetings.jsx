@@ -7,11 +7,11 @@ class SearchMeetings extends Component {
     constructor(props){
         super(props);
         this.state = {
-            status: "Fetching",
+            Status: "Fetching",
             Meetings:'',
             viewDate: 'All',
             description:'',
-            Members:[]
+            emails:null
         }
         this.viewDateInputRef = React.createRef()
         this.descInputRef = React.createRef()
@@ -25,80 +25,95 @@ class SearchMeetings extends Component {
         })
     }
 
-    removeUserHelper(id){
-        removeUser(id).then(response=>{
-            if(response){
-                alert("User Excused");
-            }
-            window.location.reload();
-        }).catch(error=>{
-            alert(error);
-        })
-
-    }
-
-   
-    addMemberHelper = (id, email)=>{
-        addUser(id, email).then(()=>{
-            window.location.reload()
-        })
-    }
-
     getMeetingsFunction = async (event)=>{
         event.preventDefault();
-        let emailsArr = [];
-        await getEmails().then(response=>{
-            response.forEach(email=>{
-                emailsArr.push(email.email);
-            })
-        });
-        
-        await this.setState({
-            emails:emailsArr
-        });
-        
-        let meetings = getMeetingsByDateAndDesc(this.state.viewDate, this.state.description).then(response=>{
-            this.setState({
-                Meetings: response.map((meeting, i) =>{
-                    return (
-                        <div className="container mt-2 mb-2">
-        <div className="card" key={meeting._id}>
-            <div className="card-header">
-                {meeting.description}
-            </div>
-            <div className="card-body">
-                <div className="card" >
-                        <div className="card-header">
-                            Members
-                        </div>
-                        <ul className="list-group list-group-flush">
-                            {meeting.emails.map(email=><li className="list-group-item" key={email}>{email}</li>)}
-                        </ul>
-                </div>
-                <h5 className="card-title alert alert-primary mt-2">Timings: {meeting.startHour}:{meeting.startMin} - {meeting.endHour}:{meeting.endMin}</h5>
-                <p className="card-text alert alert-success">Date: {meeting.dateOfMeeting}</p>
-                <button className="btn btn-danger mb-5" onClick={()=>{this.removeUserHelper(meeting._id)}}>Excuse Yourself</button>
-                <div className="form-group alert alert-primary">
-                        <label forHtml="viewDate">Select Members</label>
-                        <select className="form-control" id={meeting._id} name="members">
-                                            {this.state.emails.map(email=>{
-                                                return <option>{email}</option>
-                                            })}
-                        </select>
-                        <button className="btn btn-primary mt-2" onClick={()=>{this.addMemberHelper(meeting._id,document.getElementById(`${meeting._id}`).value)}}>Add Members</button>
-                                </div>
-                            </div>
-                        </div>
-                </div>
-                  )})
-            });
-        });
+        this.componentDidMount();
     }
-    
 
-    render() {
-        return (
-            <div className="container">
+    addMemberHelper = async (id, email)=>{
+        try{
+            await addUser(id, email);
+            alert("User Added");
+            this.componentDidMount();
+        }catch(error){
+            alert("Error Adding User");
+        }
+    }
+
+    removeUserHelper = async (id)=>{
+        try{
+            await removeUser(id);
+            alert("User Excused");
+            this.componentDidMount();
+        }catch(error){
+            alert("Error Excusing User");
+        }
+    }
+
+    componentDidMount= async ()=>{
+        try{
+                let emailsArr = [];
+                let emails = await getEmails();
+                emails.forEach(email=>{
+                    emailsArr.push(email.email);
+                });
+                await this.setState({
+                    emails:emailsArr
+                });
+
+                let meetings = await getMeetingsByDateAndDesc(this.state.viewDate, this.state.description)
+                await this.setState({
+                    Meetings:meetings,
+                    Status:'Fetched'
+                });
+            }catch(error){
+                alert("Enter Valid Search Parameters");
+            }
+    }
+
+        render(){
+            let el = {};
+            switch(this.state.Status){
+                case 'Fetching' : el = this.state.Status;
+                                    break;
+                case 'Fetched' : el = (
+                    this.state.Meetings.map((meeting, i)=>{
+                        return (
+                            <div className="container mt-2 mb-2" key={meeting._id}>
+                                <div className="card" >
+                                    <div className="card-header">
+                                        {meeting.description}
+                                    </div>
+                                <div className="card-body">
+                                    <div className="card" >
+                                            <div className="card-header">
+                                                Members
+                                            </div>
+                                            <ul className="list-group list-group-flush">
+                                                {meeting.emails.map(email=><li className="list-group-item" key={email}>{email}</li>)}
+                                            </ul>
+                                    </div>
+                                <h5 className="card-title alert alert-primary mt-2">Timings: {meeting.startHour}:{meeting.startMin} - {meeting.endHour}:{meeting.endMin}</h5>
+                                <p className="card-text alert alert-success">Date: {meeting.dateOfMeeting}</p>
+                                <button className="btn btn-danger mb-5" onClick={()=>{this.removeUserHelper(meeting._id)}}>Excuse Yourself</button>
+                                <div className="form-group alert alert-primary">
+                                <label forhtml="viewDate">Select Members</label>
+                                <select className="form-control" id={meeting._id} name="members">
+                                                    {this.state.emails.map(email=>{
+                                                        return <option>{email}</option>
+                                                    })}
+                                </select>
+                                <button className="btn btn-primary mt-2" onClick={()=>{this.addMemberHelper(meeting._id,document.getElementById(`${meeting._id}`).value)}}>Add Members</button>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                      )
+                    })
+                );
+            }
+            return(
+                <div className="container">
                 <div className="row my-4">
                     <div className="col-12">
                         <h3>
@@ -133,11 +148,11 @@ class SearchMeetings extends Component {
                     </form>
                 </div>
                 <div>
-                        {this.state.Meetings}         
+                        {el}         
                 </div>
             </div>
-        );
-    }
+            )
+        }
 }
 
 export default SearchMeetings;

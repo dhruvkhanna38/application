@@ -7,26 +7,42 @@ class Calender extends Component {
     constructor(props){
         super(props);
         this.state = {
+            Status:'Fetching',
             Meetings : null,
             dateOfMeeting : moment().format('DD/MM/YYYY')
         }
         this.dateInputRef = React.createRef()
+        
+    }
+    updateCredentials = async ()=>{
+        this.setState({
+            dateOfMeeting: await moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY')
+        });
+        this.componentDidMount()
     }
 
-    updateCredentials = ()=>{
-        this.setState({
-            dateOfMeeting:moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY')
-        })
-    }
-    
-    
-    getMeetingsByDateFunction = (event)=>{
-        event.preventDefault();
-        let meetings = getMeetingByDate(this.state.dateOfMeeting).then(response=>{
+    componentDidMount=  async ()=>{
+        try{
+            const meetings = await getMeetingByDate(this.state.dateOfMeeting);
             this.setState({
-                Meetings: response.map((meeting, i) =>{
+                Status:'Fetched',
+                Meetings:meetings
+            })
+            
+        }catch(error){
+            alert("Invalid Date");
+        }
+    }
+
+    render() {
+        let el = {}
+        switch(this.state.Status){
+            case 'Fetching' : el = this.state.Status
+                              break;
+            case 'Fetched' : el = (
+                this.state.Meetings.map((meeting, i)=>{
                     return (
-                        <div className="container mt-2 mb-2">
+                        <div className="container mt-2 mb-2" key={meeting._id}>
                             <div className="card" key={meeting._id}>
                                 <div className="card-header">
                                     {meeting.description}
@@ -45,31 +61,28 @@ class Calender extends Component {
                                 </div>
                             </div>
                         </div>
-                  )})
-            })
-        })
-    }
-
-    render() {
+                  )
+                })
+            );
+        }
         return (
             <div>
                 <div className="container">
                         <h1>Calender</h1>
                         <hr />
-                        <form onSubmit={this.getMeetingsByDateFunction} >
+                        <form>
                             <div className="form-group " >
                                 <label htmlFor="date" className="w-100 col-form-label alert alert-primary">Enter Date Below</label>
                                 <input type="date" className="form-control" name="date" value={this.state.dateOfMeeting.toString()} id="date" placeholder="Select Date" ref={this.dateInputRef} onChange={this.updateCredentials} />
                             </div>
-                            <button type="submit" className="btn btn-primary mb-1">Submit</button>
                         </form>
                         <div className="alert alert-primary w-25 mt-2" role="alert">
-                            Date: {this.state.dateOfMeeting.toString()}
+                            Date: {this.state.dateOfMeeting}
                         </div>
                 </div>
                 
                 <div>
-                    {this.state.Meetings}
+                    {el}
                 </div>
             </div>
         );

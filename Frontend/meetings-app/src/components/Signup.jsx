@@ -14,10 +14,14 @@ class Signup extends Component {
         this.nameInputRef = React.createRef();
     }
 
-    signup = (event)=>{
+    signup = async (event)=>{
         event.preventDefault();
-        signup(this.state).then(()=>{this.props.history.push('/')
-                                     window.location.reload()}).catch(error=>alert(error));
+        try{
+            await signup(this.state);
+            this.props.history.pish("/profile");
+        }catch(error){
+            alert("Invalid Credentials");
+        }
     }
 
     updateCredentials = ()=>{
