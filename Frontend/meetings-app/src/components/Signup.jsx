@@ -18,7 +18,7 @@ class Signup extends Component {
         event.preventDefault();
         try{
             await signup(this.state);
-            this.props.history.pish("/profile");
+            this.props.history.push("/profile");
         }catch(error){
             alert("Invalid Credentials");
         }

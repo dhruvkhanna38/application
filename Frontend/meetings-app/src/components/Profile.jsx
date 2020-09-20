@@ -1,5 +1,6 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { Component } from 'react';
-import {getProfile, setAvatar, updateUserEmail,updatePassword} from "../services/meetings.js" 
+import {getProfile, setProfileNavbar, updateUserEmail,updatePassword, setProfilePicture} from "../services/meetings.js" 
 import {logout} from "../services/auth.js"
 
 class Profile extends Component {
@@ -9,7 +10,8 @@ class Profile extends Component {
             Status:'Fetching',
             profile : null,
             image:null,
-            email:null
+            email:null,
+            imageURL:"https://icons.iconarchive.com/icons/icons8/windows-8/128/Photo-Video-Slr-Back-Side-icon.png"
         }
         this.imageInputRef = React.createRef();
         this.emailInputRef = React.createRef();
@@ -59,12 +61,13 @@ class Profile extends Component {
 
     onFormSubmit = async (e)=>{
         e.preventDefault(); // Stop form submit
+        
         try{
-            await setAvatar(this.state.image);
+            await uploadToS3(this.state.image);
             alert("Profile Image Updated");
-            this.componentDidMount();
-            this.props.history.push("/");
-            window.location.reload();
+            await this.componentDidMount()
+            await this.props.history.push("/")
+            //await window.location.reload();
         }catch(error){
             alert("Only .jpg, .jpeg and .png files less than 2MB size are allowed");
         }
@@ -73,14 +76,11 @@ class Profile extends Component {
     componentDidMount = async ()=> {
         try{
             let profile = await getProfile();
-            let imageURL = "https://icons.iconarchive.com/icons/icons8/windows-8/128/Photo-Video-Slr-Back-Side-icon.png"
-            if(profile.user.avatar){
-                imageURL = `https://radiant-lowlands-13182.herokuapp.com/users/${profile.user._id}/avatar`;
-            }
-            this.setState({
+            console.log(profile)
+            await this.setState({
                 profile:profile,
-                imageURL:imageURL,
-                Status:'Fetched'
+                Status:'Fetched',
+                imageURL:profile.user.avatar
             })
         }catch(error){
             alert("Cannot Get Profile");
@@ -91,13 +91,14 @@ class Profile extends Component {
     render() {
         const {profile, imageURL} = this.state;
         let el = {};
+        // eslint-disable-next-line default-case
         switch(this.state.Status){
             case 'Fetching' : el = "Fetching User Profile"
                                 break;
             case 'Fetched' : el = (
-                <div>
+                        <div>
                             <div className="card w-50 mt-5 mx-auto h-25" >
-                                <img className="card-img-top rounded img-thumbnail w-50 m-auto" src={imageURL} alt="Card image cap" />
+                                <img className="card-img-top rounded img-thumbnail w-50 m-auto" src={this.state.imageURL} alt="Card image cap" />
                                 <div className="card-body">
                                     <h5 className="card-title">{profile.user.name}</h5>
                                     <p className="card-text">{profile.user.email}</p>
@@ -138,6 +139,44 @@ class Profile extends Component {
             </div>
         );
     }
+}
+
+const uploadToS3 = async (image)=>{
+    const formData = new FormData(); 
+    await formData.append( 
+        "profile", 
+        image, 
+        image.name 
+    ); 
+    var S3 = require("aws-sdk/clients/s3");
+    const BUCKET_NAME = "profile-pictures-meetings-app";
+    const IAM_USER_KEY = "AKIAIWAALGDAMVC5IXFA";
+    const IAM_USER_SECRET = "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";
+    
+    const s3bucket = new S3({
+        apiVersion: '2006-03-01',
+        accessKeyId: IAM_USER_KEY,
+        secretAccessKey: IAM_USER_SECRET,
+        Bucket: BUCKET_NAME
+    });
+
+    let contentType = "image/jpeg";
+    let contentDeposition = 'inline;filename="' +image.name   + '"';
+    const params = {
+        Bucket: BUCKET_NAME,
+        Key: image.name,
+        Body: image,
+        ContentDisposition: contentDeposition,
+        ContentType: contentType
+    };
+    let url = ""
+    await s3bucket.upload(params, async (err, data) => {
+            url = data.Location;
+            await console.log( data.Location);
+            await setProfileNavbar(image);
+            await setProfilePicture(data.Location);
+    });
+    return url;
 }
 
 export default Profile;

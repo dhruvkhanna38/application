@@ -6,7 +6,6 @@ import SearchMeetings from "./SearchMeetings"
 import {getEmails} from "../services/meetings.js"
 
 class Meetings extends Component {
-    
 
     
     render() {

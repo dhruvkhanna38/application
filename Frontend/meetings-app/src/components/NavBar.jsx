@@ -27,7 +27,7 @@ class NavBar extends React.Component {
             const profile = await getProfile();
             let profileURL = undefined;
             if(profile.user.profileImage){
-             profileURL = `https://radiant-lowlands-13182.herokuapp.com/users/${profile.user._id}/profile`;
+             profileURL = `http://localhost:3000/users/${profile.user._id}/profile`;
             }
             this.setState({
                 profileImg:profileURL || this.state.profileImg,

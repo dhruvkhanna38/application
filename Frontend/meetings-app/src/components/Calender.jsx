@@ -1,32 +1,47 @@
-import React, { Component } from 'react';
+import React from 'react'
+import FullCalendar, { formatDate } from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
+import { Component } from 'react';
 import {getMeetingByDate} from "../services/meetings.js";
+import {getMeetings} from "../services/meetings.js";
+import "./main.css"
+
 const moment = require("moment");
 
 
-class Calender extends Component {
+
+export default class DemoApp extends React.Component {
+
     constructor(props){
         super(props);
         this.state = {
             Status:'Fetching',
             Meetings : null,
-            dateOfMeeting : moment().format('DD/MM/YYYY')
-        }
-        this.dateInputRef = React.createRef()
-        
+            weekendsVisible: true,
+            eventsArr:[]
+        } 
     }
-    updateCredentials = async ()=>{
-        this.setState({
-            dateOfMeeting: await moment(new Date(this.dateInputRef.current.value)).format('DD/MM/YYYY')
-        });
-        this.componentDidMount()
-    }
-
     componentDidMount=  async ()=>{
         try{
-            const meetings = await getMeetingByDate(this.state.dateOfMeeting);
-            this.setState({
+            const meetings = await getMeetings();
+            
+            let eventsArr = [];
+            
+            meetings.forEach(meeting=>{
+                eventsArr.push({title:meeting.description, 
+                                date:meeting.dateOfMeeting.split("/").reverse().join("-"), 
+                                time:`${meeting.startHour}:${meeting.startMin} - ${meeting.endHour}:${meeting.endMin}`, 
+
+                                
+                                })
+            });
+            
+            await this.setState({
                 Status:'Fetched',
-                Meetings:meetings
+                Meetings:meetings,
+                eventsArr: eventsArr
             })
             
         }catch(error){
@@ -34,59 +49,78 @@ class Calender extends Component {
         }
     }
 
-    render() {
-        let el = {}
-        switch(this.state.Status){
-            case 'Fetching' : el = this.state.Status
-                              break;
-            case 'Fetched' : el = (
-                this.state.Meetings.map((meeting, i)=>{
-                    return (
-                        <div className="container mt-2 mb-2" key={meeting._id}>
-                            <div className="card" key={meeting._id}>
-                                <div className="card-header">
-                                    {meeting.description}
-                                </div>
-                                <div className="card-body">
-                                    <h5 className="card-title alert-primary mt-2">Timings: {meeting.startHour}:{meeting.startMin} - {meeting.endHour}:{meeting.endMin}</h5>
-                                    <p className="card-text alert alert-success">Date: {meeting.dateOfMeeting}</p>
-                                    <div className="card" >
-                                        <div className="card-header">
-                                            Members
-                                        </div>
-                                        <ul className="list-group list-group-flush">
-                                            {meeting.emails.map(email=><li className="list-group-item" key={email}>{email}</li>)}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                  )
-                })
-            );
-        }
-        return (
-            <div>
-                <div className="container">
-                        <h1>Calender</h1>
-                        <hr />
-                        <form>
-                            <div className="form-group " >
-                                <label htmlFor="date" className="w-100 col-form-label alert alert-primary">Enter Date Below</label>
-                                <input type="date" className="form-control" name="date" value={this.state.dateOfMeeting.toString()} id="date" placeholder="Select Date" ref={this.dateInputRef} onChange={this.updateCredentials} />
-                            </div>
-                        </form>
-                        <div className="alert alert-primary w-25 mt-2" role="alert">
-                            Date: {this.state.dateOfMeeting}
-                        </div>
-                </div>
-                
-                <div>
-                    {el}
-                </div>
-            </div>
-        );
-    }
+  render() {
+    return (
+      <div className='demo-app'>
+        {this.renderSidebar()}
+        <div className='demo-app-main'>
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth'
+            }}
+            initialView='dayGridMonth'
+            editable={true}
+            selectable={true}
+            eventTimeFormat=  {{
+                hour: "numeric",
+                minute: "2-digit",
+                meridiem: "short"}}
+            events = {this.state.eventsArr}
+            selectMirror={true}
+            dayMaxEvents={true}
+            select={this.handleDateSelect}
+            
+             // custom render function
+           //called after events are initialized/added/changed/removed
+            /* you can update a remote database when these fire:
+            eventAdd={function(){}}
+            eventChange={function(){}}
+            eventRemove={function(){}}
+            */
+          />
+        </div>
+      </div>
+    )
+  }
+
+  renderSidebar() {
+    return (
+      <div className='demo-app-sidebar'>
+        <div className='demo-app-sidebar-section'>
+          <h2>Your List Of Meetings</h2>
+        </div>
+        <div className='demo-app-sidebar-section'>
+          
+          <ul>
+            {this.state.eventsArr.map(renderSidebarEvent)}
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+
+
+  
+  handleEvents = (events) => {
+    this.setState({
+      currentEvents: events
+    })
+  }
+
 }
 
-export default Calender;
+
+function renderSidebarEvent(event) {
+  return (
+      <div className="alert alert-primary">
+           <p><h4><b>{event.title}</b></h4></p> 
+            <p><i>Date : {event.date}</i></p>
+            <i>Timings : {event.time}</i>
+      </div>
+    
+  )
+}
